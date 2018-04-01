@@ -21,26 +21,7 @@
 
 package org.eclipse.paho.client.mqttv3;
 
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
-
-import org.eclipse.paho.client.mqttv3.internal.ClientComms;
-import org.eclipse.paho.client.mqttv3.internal.ConnectActionListener;
-import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
-import org.eclipse.paho.client.mqttv3.internal.ExceptionHelper;
-import org.eclipse.paho.client.mqttv3.internal.NetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.SSLNetworkModule;
-import org.eclipse.paho.client.mqttv3.internal.TCPNetworkModule;
+import org.eclipse.paho.client.mqttv3.internal.*;
 import org.eclipse.paho.client.mqttv3.internal.security.SSLSocketFactoryFactory;
 import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketNetworkModule;
 import org.eclipse.paho.client.mqttv3.internal.websocket.WebSocketSecureNetworkModule;
@@ -53,6 +34,18 @@ import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
+import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Lightweight client for talking to an MQTT server using non-blocking methods
@@ -460,7 +453,7 @@ public class MqttAsyncClient implements IMqttAsyncClient {
 			throw new IllegalArgumentException("ClientId longer than 65535 characters");
 		}
 
-		MqttConnectOptions.validateURI(serverURI);
+		MqttConnectOptions.validateURI(serverURI); //tcp 인지 localhost 인지 정하는 부분 staticClass
 
 		this.serverURI = serverURI;
 		this.clientId = clientId;

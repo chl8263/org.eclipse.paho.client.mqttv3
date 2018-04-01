@@ -19,34 +19,16 @@
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
+import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.internal.wire.*;
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.eclipse.paho.client.mqttv3.BufferedMessage;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.IMqttMessageListener;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.MqttPingSender;
-import org.eclipse.paho.client.mqttv3.MqttToken;
-import org.eclipse.paho.client.mqttv3.MqttTopic;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttDisconnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 /**
  * Handles client communications with the server.  Sends and receives MQTT V3
@@ -144,6 +126,7 @@ public class ClientComms {
 
         if (token.getClient() == null ) {
             // Associate the client with the token - also marks it as in use.
+            System.out.println("ClientComms- > IternalSend -> token.getClient ==nul;");
             token.internalTok.setClient(getClient());
         } else {
             // Token is already in use - cannot reuse
@@ -155,6 +138,7 @@ public class ClientComms {
 
         try {
             // Persist if needed and send the message
+            System.out.println("ClientComms- > IternalSend -> try");
             this.clientState.send(message, token);
         } catch(MqttException e) {
             if (message instanceof MqttPublish) {
@@ -176,6 +160,7 @@ public class ClientComms {
         if (isConnected() ||
                 (!isConnected() && message instanceof MqttConnect) ||
                 (isDisconnecting() && message instanceof MqttDisconnect)) {
+
             if(disconnectedMessageBuffer != null && disconnectedMessageBuffer.getMessageCount() != 0){
                 //@TRACE 507=Client Connected, Offline Buffer available, but not empty. Adding message to buffer. message={0}
                 log.fine(CLASS_NAME, methodName, "507", new Object[] {message.getKey()});
@@ -184,6 +169,7 @@ public class ClientComms {
                 }
                 disconnectedMessageBuffer.putMessage(message, token);
             } else {
+                System.out.println("ClientComms->SendNoWait");
                 this.internalSend(message, token);
             }
         } else if(disconnectedMessageBuffer != null) {

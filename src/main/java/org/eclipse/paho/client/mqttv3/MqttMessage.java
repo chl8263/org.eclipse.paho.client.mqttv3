@@ -178,7 +178,7 @@ public class MqttMessage {
 	 */
 	public void setQos(int qos) {
 		checkMutable();
-		validateQos(qos);
+		validateQos(qos); //현재 들어온 qos 값이 유효한 값인지 판별
 		this.qos = qos;
 	}
 

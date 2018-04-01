@@ -21,38 +21,16 @@
  */
 package org.eclipse.paho.client.mqttv3.internal;
 
+import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.client.mqttv3.internal.wire.*;
+import org.eclipse.paho.client.mqttv3.logging.Logger;
+import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
+
 import java.io.EOFException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
-
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
-import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistable;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.MqttPingSender;
-import org.eclipse.paho.client.mqttv3.MqttToken;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnack;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttConnect;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingReq;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPingResp;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubComp;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRec;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPubRel;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttPublish;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttSuback;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttSubscribe;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubAck;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttUnsubscribe;
-import org.eclipse.paho.client.mqttv3.internal.wire.MqttWireMessage;
-import org.eclipse.paho.client.mqttv3.logging.Logger;
-import org.eclipse.paho.client.mqttv3.logging.LoggerFactory;
 
 /**
  * The core of the client, which holds the state information for pending and
@@ -484,6 +462,12 @@ public class ClientState {
 	public void send(MqttWireMessage message, MqttToken token) throws MqttException {
 		final String methodName = "send";
 		if (message.isMessageIdRequired() && (message.getMessageId() == 0)) {
+
+			System.out.println("ClientState -> send");
+			System.out.print("ClientState send 보낼 메세지는-> ");
+			String a = new String(((MqttPublish) message).getMessage().getPayload());
+			System.out.println(a);
+
 				if(message instanceof MqttPublish  && (((MqttPublish) message).getMessage().getQos() != 0)){
 						message.setMessageId(getNextMessageId());
 				}else if(message instanceof MqttPubAck ||
@@ -495,6 +479,7 @@ public class ClientState {
 						message instanceof MqttUnsubscribe || 
 						message instanceof MqttUnsubAck){
 					message.setMessageId(getNextMessageId());
+					System.out.println(message.toString());
 				}
 		}
 		if (token != null ) {
@@ -514,28 +499,34 @@ public class ClientState {
 				}
 				
 				MqttMessage innerMessage = ((MqttPublish) message).getMessage();
+
 				//@TRACE 628=pending publish key={0} qos={1} message={2}
 				log.fine(CLASS_NAME,methodName,"628", new Object[]{new Integer(message.getMessageId()), new Integer(innerMessage.getQos()), message});
 
 				switch(innerMessage.getQos()) {
 					case 2:
+						System.out.println("ClientState -> qos2");
 						outboundQoS2.put(new Integer(message.getMessageId()), message);
 						persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
 						break;
 					case 1:
+						System.out.println("ClientState -> qos1");
 						outboundQoS1.put(new Integer(message.getMessageId()), message);
 						persistence.put(getSendPersistenceKey(message), (MqttPublish) message);
 						break;
 				}
+
 				tokenStore.saveToken(token, message);
 				pendingMessages.addElement(message);
 				queueLock.notifyAll();
 			}
 		} else {
+
 			//@TRACE 615=pending send key={0} message {1}
 			log.fine(CLASS_NAME,methodName,"615", new Object[]{new Integer(message.getMessageId()), message});
 			
 			if (message instanceof MqttConnect) {
+				System.out.println("ClientState -> MqttConnect\n");
 				synchronized (queueLock) {
 					// Add the connect action at the head of the pending queue ensuring it jumps
 					// ahead of any of other pending actions.

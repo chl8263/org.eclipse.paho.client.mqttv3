@@ -18,13 +18,12 @@
  */
 package org.eclipse.paho.client.mqttv3;
 
-import java.util.Properties;
-import java.util.concurrent.ScheduledExecutorService;
-
-import javax.net.SocketFactory;
-
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 import org.eclipse.paho.client.mqttv3.util.Debug;
+
+import javax.net.SocketFactory;
+import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * Lightweight client for talking to an MQTT server using methods that block
@@ -330,7 +329,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 * @see IMqttClient#connect(MqttConnectOptions)
 	 */
 	public void connect(MqttConnectOptions options) throws MqttSecurityException, MqttException {
-		aClient.connect(options, null, null).waitForCompletion(getTimeToWait());
+		aClient.connect(options, null, null).waitForCompletion(getTimeToWait()); //메세지가 성공적으로 전달 되었는지 판별
 	}
 
 	/*
@@ -569,7 +568,7 @@ public class MqttClient implements IMqttClient { //), DestinationProvider {
 	 */
 	public void publish(String topic, byte[] payload,int qos, boolean retained) throws MqttException,
 			MqttPersistenceException {
-		MqttMessage message = new MqttMessage(payload);
+		MqttMessage message = new MqttMessage(payload); //들어온 페이로드를 byte로 바구기만 하는 부분
 		message.setQos(qos);
 		message.setRetained(retained);
 		this.publish(topic, message);
